@@ -6,6 +6,10 @@ const { log } = console;
 export const uploadFile = async (ctx, next) => {
   const busboy = new Busboy({
     headers: { "content-type": ctx.get("content-type") },
+    highWaterMark: 5 * 1024 * 1024,
+    limits: {
+      fileSize: 25 * 1024 * 1024,
+    },
   });
 
   busboy.on("file", (fieldname, file, filename, encoding, mimetype) => {
@@ -60,9 +64,7 @@ export const uploadFile = async (ctx, next) => {
     ctx.body = { result: "Ok" };
   });
 
-  await ctx.req.pipe(busboy).on("error", (error) => {
+  ctx.req.pipe(busboy).on("error", (error) => {
     log("Ошибка в потоке", error);
   });
-
-  await next();
 };
