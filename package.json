@@ -1,0 +1,13 @@
+{
+  "name": "upload-files-demo",
+  "version": "1.0.0",
+  "main": "src/index.js",
+  "repository": "https://github.com/budarin/upload-files-demo.git",
+  "author": "Vadim Budarin <budarin-vv@yandex.ru>",
+  "license": "MIT",
+  "dependencies": {
+    "busboy": "^0.3.1",
+    "koa": "^2.13.4",
+    "koa-router": "^10.1.1"
+  }
+}
