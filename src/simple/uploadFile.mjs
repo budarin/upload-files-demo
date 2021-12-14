@@ -5,7 +5,7 @@ const { log } = console;
 
 export const uploadFile = async (ctx) => {
   const p = new Promise((resolve, reject) => {
-    const fileName = ctx.get('x-name');
+    const fileName = decodeURIComponent(ctx.get('X-filename'));
     const writableStream = createWriteStream(fileName);
 
     writableStream.on('error', (error) => {
