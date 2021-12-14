@@ -3,7 +3,7 @@ import { inspect } from "util";
 
 const { log } = console;
 
-export const uploadFile = async (ctx) => {
+export const uploadFile = async (ctx, next) => {
   const busboy = new Busboy({
     headers: { "content-type": ctx.get("content-type") },
   });
@@ -38,6 +38,10 @@ export const uploadFile = async (ctx) => {
     ctx.respondWithError(500);
   });
 
+  busboy.on("partsLimit", () => log("LIMIT_PART_COUNT"));
+  busboy.on("filesLimit", () => log("LIMIT_FILE_COUNT"));
+  busboy.on("fieldsLimit", () => log("LIMIT_FIELD_COUNT"));
+
   busboy.on(
     "field",
     (
@@ -56,5 +60,9 @@ export const uploadFile = async (ctx) => {
     ctx.body = { result: "Ok" };
   });
 
-  ctx.req.pipe(busboy);
+  await ctx.req.pipe(busboy).on("error", (error) => {
+    log("Ошибка в потоке", error);
+  });
+
+  await next();
 };
