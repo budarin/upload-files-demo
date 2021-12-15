@@ -10,6 +10,7 @@ const uploadFile = async (file) => {
     if (file) {
         const formData = new FormData();
         const xhr = new XMLHttpRequest();
+        xhr.timeout = 60000;
 
         xhr.open('POST', '/upload', true);
 
@@ -39,7 +40,9 @@ const uploadFile = async (file) => {
             }
         };
 
-        await sendFile(xhr, file).catch((err) => console.log('err sending file', err));
+        await sendFile(xhr, file).catch((err) => {
+            console.log('err sending file', err);
+        });
 
         if (xhr.status === 201) {
             console.log(JSON.parse(xhr.response));
