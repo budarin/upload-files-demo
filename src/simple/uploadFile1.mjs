@@ -7,8 +7,12 @@ const { log } = console;
 
 // const pdf = Buffer.from('%PDF', 'utf8');
 
-const pdf = Buffer.from('25504446', 'hex');
-const pdfType = 'application/pdf';
+const allowedFileTypes = [
+    {
+        contentType: 'application/pdf',
+        signature: Buffer.from('25504446', 'hex'),
+    },
+];
 
 export const uploadFile1 = async (ctx) => {
     let isFirstChunk = true;
@@ -16,12 +20,24 @@ export const uploadFile1 = async (ctx) => {
     const fileName = `tmp/${decodeURIComponent(ctx.get('X-filename'))}`;
     const writableStream = createWriteStream(fileName);
 
+    const isAlowedFileType = (ctx, chunk) => {
+        allowedFileTypes.find((fileType) => {
+            const chunkSignature = chunk.subarray(0, fileType.signature.byteLength);
+            const signaturesAreEqual = fileType.signature.equals(chunkSignature);
+            const contentTypesAreEqual = ctx.get('content-type') === fileType.contentType;
+
+            if (contentTypesAreEqual && !signaturesAreEqual) {
+                console.log('Внимание!! попытка подделки файла', fileName);
+            }
+
+            return contentTypesAreEqual && signaturesAreEqual;
+        });
+    };
+
     const p = new Promise((resolve, reject) => {
         ctx.req.on('data', (chunk) => {
             if (isFirstChunk) {
-                const sign = chunk.subarray(0, pdf.byteLength);
-
-                if (fileType !== pdfType || !pdf.equals(sign)) {
+                if (!isAlowedFileType(ctx, chunk)) {
                     writableStream.destroy();
 
                     reject(new Error('Wrong file type'));
@@ -69,7 +85,7 @@ export const uploadFile1 = async (ctx) => {
             ctx.body = { result: 'Ok' };
         })
         .catch((error) => {
-            log('error file saving', fileName, inspect(error));
+            log('error file saving', fileName, error.message);
 
             ctx.set('Connection', 'close');
             ctx.status = 500;
