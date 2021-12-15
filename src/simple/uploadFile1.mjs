@@ -83,11 +83,13 @@ export const uploadFile1 = async (ctx) => {
             ctx.body = { result: 'Ok' };
         })
         .catch((error) => {
-            log('error file saving', fileName, error.message);
+            const { message } = error;
+
+            log('error file saving', fileName, message);
 
             ctx.set('Connection', 'close');
-            ctx.status = error.message === WRONG_FILE_TYPE ? 403 : 500;
-            ctx.body = error.message;
+            ctx.status = message === WRONG_FILE_TYPE ? 403 : 500;
+            ctx.body = message;
 
             void unlink(fileName).catch((error) => {
                 log({
