@@ -1,22 +1,41 @@
 let wakeLock;
 let locks = 0;
 
-const requestWakeLock = () => {
-    wakeLock = navigator.wakeLock.request('screen');
-    locks++;
-};
-
-const releaseWakeLock = () => {
-    if (locks) {
-        locks--;
-        return;
-    }
-
-    if (wakeLock) {
-        wakeLock.release();
-        wakeLock = undefined;
+const requestWakeLock = async () => {
+    if ('wakeLock' in navigator && document.visibilityState === 'visible') {
+        console.log('request wakelock');
+        wakeLock = await navigator.wakeLock.request('screen');
+        locks++;
     }
 };
+
+const releaseWakeLock = async () => {
+    if ('wakeLock' in navigator) {
+        console.log('release wakelock');
+
+        if (locks) {
+            locks--;
+        } else {
+            return;
+        }
+
+        if (wakeLock) {
+            await wakeLock.release().then(() => {
+                wakeLock = null;
+            });
+        }
+    }
+};
+
+if ('wakeLock' in navigator) {
+    document.addEventListener('visibilitychange', () => {
+        if (wakeLock !== null && document.visibilityState === 'visible') {
+            console.log('rerequest wakelock');
+            locks--;
+            void requestWakeLock();
+        }
+    });
+}
 
 function sendFile(xhr, body) {
     return new Promise((resolve, reject) => {
@@ -46,16 +65,13 @@ const uploadFile = async (file) => {
 
         xhr.upload.ontimeout = function () {
             console.log('timeout error');
-            releaseWakeLock();
         };
 
         xhr.upload.onload = function () {
             console.log('Загружено: ' + xhr.status + '  ' + xhr.response + ' ' + xhr.readyState);
-            releaseWakeLock();
         };
 
         xhr.upload.onerror = function (ev) {
-            releaseWakeLock();
             if (this.status == 200) {
                 console.log('success');
             } else {
@@ -63,9 +79,13 @@ const uploadFile = async (file) => {
             }
         };
 
-        await sendFile(xhr, file).catch((err) => {
-            console.log('err sending file', err);
-        });
+        await sendFile(xhr, file)
+            .catch((err) => {
+                console.log('err sending file', err);
+            })
+            .then(() => {
+                void releaseWakeLock();
+            });
 
         if (xhr.status === 201) {
             console.log(JSON.parse(xhr.response));
