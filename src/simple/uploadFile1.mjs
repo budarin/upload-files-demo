@@ -19,7 +19,7 @@ export const uploadFile1 = async (ctx) => {
     const writableStream = createWriteStream(fileName);
 
     const isAlowedFileType = (ctx, chunk) => {
-        allowedFileTypes.find((fileType) => {
+        const found = allowedFileTypes.find((fileType) => {
             const chunkSignature = chunk.subarray(0, fileType.signature.byteLength);
             const signaturesAreEqual = fileType.signature.equals(chunkSignature);
             const contentTypesAreEqual = ctx.get('content-type') === fileType.contentType;
@@ -30,6 +30,8 @@ export const uploadFile1 = async (ctx) => {
 
             return contentTypesAreEqual && signaturesAreEqual;
         });
+
+        return Boolean(found);
     };
 
     const p = new Promise((resolve, reject) => {
@@ -42,7 +44,6 @@ export const uploadFile1 = async (ctx) => {
                     return;
                 }
 
-                log(chunk.subarray(0, pdf.byteLength));
                 isFirstChunk = false;
             }
 
