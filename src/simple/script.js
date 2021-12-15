@@ -1,4 +1,4 @@
-function send(xhr, body) {
+function sendFile(xhr, body) {
     return new Promise((resolve, reject) => {
         xhr.onload = () => resolve(xhr);
         xhr.onerror = reject;
@@ -39,9 +39,7 @@ const uploadFile = async (file) => {
             }
         };
 
-        console.log('start sending form');
-
-        await send(xhr, file);
+        await sendFile(xhr, file);
 
         if (xhr.status === 201) {
             console.log(JSON.parse(xhr.response));
