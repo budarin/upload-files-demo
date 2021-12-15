@@ -53,10 +53,10 @@ const uploadFile = async (file) => {
 
         xhr.open('POST', '/upload', true);
 
+        xhr.setRequestHeader('content-type', file.type);
         xhr.setRequestHeader('Accept', 'application/json');
         xhr.setRequestHeader('X-Requested-With', 'XMLHttpRequest');
         xhr.setRequestHeader('X-filename', encodeURIComponent(file.name));
-        xhr.setRequestHeader('content-type', file.type);
 
         xhr.upload.onprogress = (ev) => {
             const { total, loaded } = ev;
