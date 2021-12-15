@@ -1,7 +1,7 @@
-import { createWriteStream } from 'fs';
-import { unlink } from 'fs/promises';
 import { inspect } from 'util';
 import { Buffer } from 'buffer';
+import { unlink } from 'fs/promises';
+import { createWriteStream } from 'fs';
 
 const { log } = console;
 
