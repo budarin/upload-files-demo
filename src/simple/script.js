@@ -71,7 +71,7 @@ const uploadFile = async (file) => {
             .catch((err) => {
                 console.log('err sending file', err);
             })
-            .then(() => {
+            .finally(() => {
                 void releaseWakeLock();
             });
 
