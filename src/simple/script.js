@@ -48,16 +48,15 @@ function sendFile(xhr, body) {
 
 const uploadFile = async (file) => {
     if (file) {
-        const formData = new FormData();
         const xhr = new XMLHttpRequest();
+        xhr.open('POST', '/upload', true);
 
         xhr.upload.onprogress = (ev) => {
             const { total, loaded } = ev;
-            console.log('upload progress', total, loaded);
+            console.log('upload progress', ((loaded / total) * 100).toFixed(2), '%');
         };
 
         xhr.timeout = 60000;
-        xhr.open('POST', '/upload', true);
         xhr.setRequestHeader('content-type', file.type);
         xhr.setRequestHeader('Accept', 'application/json');
         xhr.setRequestHeader('X-Requested-With', 'XMLHttpRequest');
