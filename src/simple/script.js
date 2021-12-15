@@ -40,7 +40,8 @@ if ('wakeLock' in navigator) {
 function sendFile(xhr, body) {
     return new Promise((resolve, reject) => {
         xhr.onload = () => resolve(xhr);
-        xhr.onerror = reject;
+        xhr.upload.onerror = reject;
+        xhr.upload.ontimeout = () => reject(new Error('Request exceeded timeout'));
         xhr.send(body);
     });
 }
@@ -49,23 +50,18 @@ const uploadFile = async (file) => {
     if (file) {
         const formData = new FormData();
         const xhr = new XMLHttpRequest();
-        xhr.timeout = 60000;
-
-        xhr.open('POST', '/upload', true);
-
-        xhr.setRequestHeader('content-type', file.type);
-        xhr.setRequestHeader('Accept', 'application/json');
-        xhr.setRequestHeader('X-Requested-With', 'XMLHttpRequest');
-        xhr.setRequestHeader('X-filename', encodeURIComponent(file.name));
 
         xhr.upload.onprogress = (ev) => {
             const { total, loaded } = ev;
             console.log('upload progress', total, loaded);
         };
 
-        xhr.upload.ontimeout = function () {
-            console.log('timeout error');
-        };
+        xhr.timeout = 60000;
+        xhr.open('POST', '/upload', true);
+        xhr.setRequestHeader('content-type', file.type);
+        xhr.setRequestHeader('Accept', 'application/json');
+        xhr.setRequestHeader('X-Requested-With', 'XMLHttpRequest');
+        xhr.setRequestHeader('X-filename', encodeURIComponent(file.name));
 
         await sendFile(xhr, file)
             .catch((err) => {
