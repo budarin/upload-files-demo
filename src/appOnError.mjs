@@ -1,18 +1,12 @@
 export function appOnError(error, ctx) {
-  console.error({
-    what: "Ошибка в приложении Koa",
-    why: error.message,
-    where: "app.onError",
-    url: ctx.url,
-    request: pino.stdSerializers.req(ctx.req),
-    response: pino.stdSerializers.res(ctx.res),
-    error: pino.stdSerializers.err(error),
-    ...(__DEV__ && { body: String(ctx.body) }),
-  });
+    console.error({
+        what: 'Ошибка в приложении Koa',
+        why: error.message,
+        where: 'app.onError',
+        url: ctx.url,
+    });
 
-  ctx.respondWithError(
-    error.statusCode ||
-      error.status ||
-      httpConsts.HTTP_STATUS_INTERNAL_SERVER_ERROR
-  );
+    ctx.set('Cache-Control', 'no-cache, proxy-revalidate');
+    ctx.status = error.statusCode || error.status || 500;
+    ctx.body = 'Server Error';
 }

@@ -39,7 +39,7 @@ const uploadFile = async (file) => {
             }
         };
 
-        await sendFile(xhr, file);
+        await sendFile(xhr, file).catch((err) => console.log('err sending file', err));
 
         if (xhr.status === 201) {
             console.log(JSON.parse(xhr.response));
