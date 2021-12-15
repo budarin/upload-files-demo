@@ -67,18 +67,6 @@ const uploadFile = async (file) => {
             console.log('timeout error');
         };
 
-        xhr.upload.onload = function () {
-            console.log('Загружено: ' + xhr.status + '  ' + xhr.response + ' ' + xhr.readyState);
-        };
-
-        xhr.upload.onerror = function (ev) {
-            if (this.status == 200) {
-                console.log('success');
-            } else {
-                console.log('error ' + this.status);
-            }
-        };
-
         await sendFile(xhr, file)
             .catch((err) => {
                 console.log('err sending file', err);
