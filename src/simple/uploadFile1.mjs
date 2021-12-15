@@ -32,13 +32,14 @@ export const uploadFile1 = async (ctx) => {
         return Boolean(found);
     };
 
+    const WRONG_FILE_TYPE = 'Wrong file type';
+
     const uploading = new Promise((resolve, reject) => {
         ctx.req.on('data', (chunk) => {
             if (isFirstChunk) {
                 if (!isAlowedFileType(ctx, chunk)) {
                     writableStream.destroy();
-
-                    reject(new Error('Wrong file type'));
+                    reject(new Error(WRONG_FILE_TYPE));
                     return;
                 }
 
@@ -85,7 +86,7 @@ export const uploadFile1 = async (ctx) => {
             log('error file saving', fileName, error.message);
 
             ctx.set('Connection', 'close');
-            ctx.status = 500;
+            ctx.status = error.message === WRONG_FILE_TYPE ? 403 : 500;
             ctx.body = error.message;
 
             void unlink(fileName).catch((error) => {
