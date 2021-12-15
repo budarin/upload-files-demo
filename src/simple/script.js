@@ -1,3 +1,23 @@
+let wakeLock;
+let locks = 0;
+
+const requestWakeLock = () => {
+    wakeLock = navigator.wakeLock.request('screen');
+    locks++;
+};
+
+const releaseWakeLock = () => {
+    if (locks) {
+        locks--;
+        return;
+    }
+
+    if (wakeLock) {
+        wakeLock.release();
+        wakeLock = undefined;
+    }
+};
+
 function sendFile(xhr, body) {
     return new Promise((resolve, reject) => {
         xhr.onload = () => resolve(xhr);
@@ -26,13 +46,16 @@ const uploadFile = async (file) => {
 
         xhr.upload.ontimeout = function () {
             console.log('timeout error');
+            releaseWakeLock();
         };
 
         xhr.upload.onload = function () {
             console.log('Загружено: ' + xhr.status + '  ' + xhr.response + ' ' + xhr.readyState);
+            releaseWakeLock();
         };
 
         xhr.upload.onerror = function (ev) {
+            releaseWakeLock();
             if (this.status == 200) {
                 console.log('success');
             } else {
@@ -53,6 +76,8 @@ const uploadFile = async (file) => {
 };
 
 const onFileChange = (event) => {
+    requestWakeLock();
+
     if (event.target.files?.length) {
         const file = event.target.files[0];
         void uploadFile(file);
