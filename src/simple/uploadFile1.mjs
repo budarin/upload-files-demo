@@ -5,8 +5,6 @@ import { Buffer } from 'buffer';
 
 const { log } = console;
 
-// const pdf = Buffer.from('%PDF', 'utf8');
-
 const allowedFileTypes = [
     {
         contentType: 'application/pdf',
