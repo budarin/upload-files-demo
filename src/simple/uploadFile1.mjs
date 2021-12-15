@@ -1,4 +1,3 @@
-import { inspect } from 'util';
 import { Buffer } from 'buffer';
 import { unlink } from 'fs/promises';
 import { createWriteStream } from 'fs';
