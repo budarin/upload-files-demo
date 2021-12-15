@@ -14,7 +14,7 @@ const allowedFileTypes = [
 
 export const uploadFile1 = async (ctx) => {
     let isFirstChunk = true;
-    const fileType = ctx.get('content-type');
+
     const fileName = `tmp/${decodeURIComponent(ctx.get('X-filename'))}`;
     const writableStream = createWriteStream(fileName);
 
@@ -30,11 +30,10 @@ export const uploadFile1 = async (ctx) => {
 
             return contentTypesAreEqual && signaturesAreEqual;
         });
-
         return Boolean(found);
     };
 
-    const p = new Promise((resolve, reject) => {
+    const uploading = new Promise((resolve, reject) => {
         ctx.req.on('data', (chunk) => {
             if (isFirstChunk) {
                 if (!isAlowedFileType(ctx, chunk)) {
@@ -77,7 +76,7 @@ export const uploadFile1 = async (ctx) => {
         ctx.req.pipe(writableStream);
     });
 
-    await p
+    await uploading
         .then(() => {
             ctx.set('Connection', 'close');
             ctx.status = 201;
